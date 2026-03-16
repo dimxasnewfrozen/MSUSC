@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSUSC Spring 2026 Schedule</title>
+<link rel="stylesheet" href="calendar.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>MSUSC Spring 2026 Schedule</h1>
+    <p>Mechanicville-Stillwater — 97 matches across 12 teams · Mar 20 – Jun 18</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="s-games">97</div><div class="stat-lbl">Games</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-home">—</div><div class="stat-lbl">Home</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-away">—</div><div class="stat-lbl">Away</div></div>
+  </div>
+
+  <div class="controls">
+    <button class="filter-btn" onclick="clearFilters()">All teams</button>
+    <div class="view-toggle">
+      <button class="view-btn active" id="cal-btn" onclick="setView('cal')">Calendar</button>
+      <button class="view-btn" id="list-btn" onclick="setView('list')">List</button>
+    </div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+  <div id="cal-view"></div>
+  <div id="list-view" style="display:none"></div>
+</div>
+
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script src="calendar.js"></script>
+</body>
+</html>
