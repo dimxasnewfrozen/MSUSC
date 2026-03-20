@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSUSC Schedule — Version History</title>
+<link rel="stylesheet" href="calendar.css">
+<style>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: #73726c;
+    text-decoration: none;
+    padding: 4px 0;
+    margin-bottom: 4px;
+  }
+  .back-link:hover { color: #1a1a18; }
+
+  .version-block {
+    margin: 1.5rem 0 0;
+  }
+
+  .version-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 0.5px solid #d3d1c7;
+  }
+
+  .version-title {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .version-meta {
+    font-size: 11px;
+    color: #b4b2a9;
+  }
+
+  .version-stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .v-stat {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .v-stat.added   { background: #d4f0dc; color: #1a6b35; }
+  .v-stat.removed { background: #fde0df; color: #8b1a18; }
+  .v-stat.changed { background: #fef3cd; color: #7a5a00; }
+  .v-stat.none    { background: #f1efe8; color: #73726c; font-weight: 400; }
+
+  .change-section {
+    margin-bottom: 16px;
+  }
+
+  .change-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #b4b2a9;
+    margin-bottom: 6px;
+  }
+
+  .change-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-bottom: 3px;
+    font-size: 12px;
+  }
+
+  .change-row.added   { background: #f0faf3; border: 0.5px solid #b6e4c3; }
+  .change-row.removed { background: #fdf5f5; border: 0.5px solid #f3c2c0; }
+  .change-row.changed { background: #fffdf0; border: 0.5px solid #f0e09a; }
+
+  .change-badge {
+    flex-shrink: 0;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-top: 1px;
+  }
+  .change-badge.added   { background: #b6e4c3; color: #1a6b35; }
+  .change-badge.removed { background: #f3c2c0; color: #8b1a18; }
+  .change-badge.changed { background: #f0e09a; color: #7a5a00; }
+
+  .change-body { flex: 1; min-width: 0; }
+
+  .change-match {
+    font-size: 10px;
+    color: #b4b2a9;
+    margin-bottom: 2px;
+  }
+
+  .change-teams {
+    font-weight: 500;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .change-detail {
+    color: #73726c;
+    margin-bottom: 1px;
+  }
+
+  .diff-list {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .diff-field {
+    font-size: 11px;
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+
+  .diff-label {
+    color: #b4b2a9;
+    min-width: 56px;
+    flex-shrink: 0;
+  }
+
+  .diff-from {
+    color: #c0392b;
+    text-decoration: line-through;
+    word-break: break-word;
+  }
+
+  .diff-arrow { color: #b4b2a9; }
+
+  .diff-to {
+    color: #27ae60;
+    word-break: break-word;
+  }
+
+  .no-changes {
+    font-size: 12px;
+    color: #b4b2a9;
+    padding: 12px 0;
+  }
+
+  .last-run-bar {
+    font-size: 11px;
+    color: #b4b2a9;
+    background: #f1efe8;
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 0.5px solid #e8e6df;
+    margin: 1.5rem 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <a class="back-link" href="index.html">← Back to schedule</a>
+    <h1>Version History</h1>
+    <p id="subtitle">Schedule changes between uploaded versions</p>
+  </div>
+
+  <div id="last-run-bar" class="last-run-bar" style="display:none"></div>
+  <div id="content"></div>
+</div>
+
+<script src="versions/changelog-data.js"></script>
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: 'numeric', minute: '2-digit'
+    });
+  } catch { return iso; }
+}
+
+// Format a schedule date like "04/19/2026" → "Sun Apr 19"
+function fmtGameDate(d) {
+  if (!d) return '';
+  const [m, day, y] = d.split('/');
+  try {
+    const dt = new Date(+y, +m - 1, +day);
+    return dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  } catch { return d; }
+}
+
+function matchup(row) {
+  const home = row.homeTeam || row.homeClub || '?';
+  const away = row.awayTeam || row.awayClub || '?';
+  return `${home} vs ${away}`;
+}
+
+function gameDetail(row) {
+  const parts = [];
+  if (row.date) parts.push(fmtGameDate(row.date));
+  if (row.time) parts.push(row.time);
+  if (row.location) parts.push(row.location);
+  return parts.join(' · ');
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+
+function renderRow(type, row, changes) {
+  const div = document.createElement('div');
+  div.className = `change-row ${type}`;
+
+  const badgeText = { added: 'Added', removed: 'Removed', changed: 'Changed' }[type];
+
+  let diffHTML = '';
+  if (changes && changes.length > 0) {
+    diffHTML = '<div class="diff-list">' + changes.map(c =>
+      `<div class="diff-field">
+        <span class="diff-label">${c.field}</span>
+        <span class="diff-from">${c.from || '—'}</span>
+        <span class="diff-arrow">→</span>
+        <span class="diff-to">${c.to || '—'}</span>
+      </div>`
+    ).join('') + '</div>';
+  }
+
+  const actualRow = type === 'changed' ? row.row : row;
+
+  div.innerHTML = `
+    <span class="change-badge ${type}">${badgeText}</span>
+    <div class="change-body">
+      <div class="change-match">Match #${actualRow.matchNum} · ${actualRow.division || ''} · ${actualRow.gender || ''}</div>
+      <div class="change-teams">${matchup(actualRow)}</div>
+      <div class="change-detail">${gameDetail(actualRow)}</div>
+      ${diffHTML}
+    </div>`;
+  return div;
+}
+
+function renderComparison(comp, isLast) {
+  const block = document.createElement('div');
+  block.className = 'version-block';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'version-header';
+  hdr.innerHTML = `
+    <span class="version-title">v${comp.fromVersion} → v${comp.toVersion}</span>
+    <span class="version-meta">compared ${fmtDate(comp.comparedAt)}</span>`;
+  block.appendChild(hdr);
+
+  // Stats
+  const stats = document.createElement('div');
+  stats.className = 'version-stats';
+  const total = comp.added.length + comp.removed.length + comp.modified.length;
+  if (total === 0) {
+    stats.innerHTML = `<span class="v-stat none">No changes detected</span>`;
+  } else {
+    if (comp.added.length)    stats.innerHTML += `<span class="v-stat added">+${comp.added.length} added</span>`;
+    if (comp.removed.length)  stats.innerHTML += `<span class="v-stat removed">−${comp.removed.length} removed</span>`;
+    if (comp.modified.length) stats.innerHTML += `<span class="v-stat changed">~${comp.modified.length} changed</span>`;
+  }
+  block.appendChild(stats);
+
+  if (total === 0) {
+    const none = document.createElement('p');
+    none.className = 'no-changes';
+    none.textContent = 'All games are identical between these two versions.';
+    block.appendChild(none);
+  } else {
+    // Group all changes by date for readability
+    const allChanges = [
+      ...comp.added.map(r => ({ type: 'added', date: r.date, row: r })),
+      ...comp.removed.map(r => ({ type: 'removed', date: r.date, row: r })),
+      ...comp.modified.map(r => ({ type: 'changed', date: r.row.date, row: r })),
+    ].sort((a, b) => {
+      const d = a.date.localeCompare(b.date);
+      if (d !== 0) return d;
+      const aTime = a.type === 'changed' ? a.row.row.time : a.row.time;
+      const bTime = b.type === 'changed' ? b.row.row.time : b.row.time;
+      return aTime.localeCompare(bTime);
+    });
+
+    let lastDate = null;
+    for (const change of allChanges) {
+      const dateKey = change.date;
+      if (dateKey !== lastDate) {
+        const label = document.createElement('div');
+        label.className = 'change-section-label';
+        label.style.marginTop = lastDate ? '12px' : '0';
+        label.textContent = fmtGameDate(dateKey);
+        block.appendChild(label);
+        lastDate = dateKey;
+      }
+      block.appendChild(renderRow(change.type, change.row,
+        change.type === 'changed' ? change.row.changes : null));
+    }
+  }
+
+  if (!isLast) {
+    const hr = document.createElement('hr');
+    hr.className = 'section-divider';
+    block.appendChild(hr);
+  }
+
+  return block;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+
+(function init() {
+  if (typeof CHANGELOG === 'undefined') {
+    document.getElementById('content').innerHTML =
+      '<p style="color:#b4b2a9;font-size:13px;padding:1rem 0">No changelog data found. Run <code>node compare-versions.js</code> first.</p>';
+    return;
+  }
+
+  // Last run bar
+  const bar = document.getElementById('last-run-bar');
+  bar.textContent = `Last generated: ${fmtDate(CHANGELOG.lastRun)} · ${CHANGELOG.totalFiles} version file(s)`;
+  bar.style.display = 'block';
+
+  // Subtitle
+  const n = CHANGELOG.comparisons.length;
+  document.getElementById('subtitle').textContent =
+    `${n} version comparison${n !== 1 ? 's' : ''} · run node compare-versions.js after uploading a new version`;
+
+  const content = document.getElementById('content');
+  if (!CHANGELOG.comparisons || CHANGELOG.comparisons.length === 0) {
+    content.innerHTML = '<p class="no-changes">No comparisons available yet.</p>';
+    return;
+  }
+
+  // Render newest first
+  const comps = [...CHANGELOG.comparisons].reverse();
+  comps.forEach((comp, i) => {
+    content.appendChild(renderComparison(comp, i === comps.length - 1));
+  });
+})();
+</script>
+</body>
+</html>

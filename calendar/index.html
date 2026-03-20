@@ -10,7 +10,7 @@
 <div class="wrap">
   <div class="header">
     <h1>MSUSC Spring 2026 Schedule</h1>
-    <p>Mechanicville-Stillwater — 97 matches across 12 teams · Mar 20 – Jun 18</p>
+    <p id="subtitle">Mechanicville-Stillwater — 97 matches across 13 teams · Mar 20 – Jun 18</p>
   </div>
 
   <div class="stats-row">
@@ -21,6 +21,11 @@
 
   <div class="controls">
     <button class="filter-btn" onclick="clearFilters()">All teams</button>
+    <label class="filter-btn import-btn" title="Import a GotSport CSV export">
+      Import CSV
+      <input type="file" accept=".csv" style="display:none" onchange="handleCSVUpload(this)">
+    </label>
+    <a class="filter-btn" href="versions.html" style="text-decoration:none">Version history</a>
     <div class="view-toggle">
       <button class="view-btn active" id="cal-btn" onclick="setView('cal')">Calendar</button>
       <button class="view-btn" id="list-btn" onclick="setView('list')">List</button>

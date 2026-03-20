@@ -85,6 +85,16 @@ body {
     background: #f1efe8;
 }
 
+.import-btn {
+    cursor: pointer;
+    color: #185FA5;
+    border-color: #185FA5;
+}
+
+.import-btn:hover {
+    background: #185FA511;
+}
+
 .view-toggle {
     display: flex;
     border: 1px solid #c2c0b6;
