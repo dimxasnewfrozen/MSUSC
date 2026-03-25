@@ -78,7 +78,9 @@ function parseCalendarCSV(text) {
   const matchCol    = col('match #', 'match#', 'game #', 'game#');
   const dateCol     = col('date');
   const timeCol     = col('time');
+  const homeClubCol = col('home club');
   const homeCol     = col('home team');
+  const awayClubCol = col('away club');
   const awayCol     = col('away team');
   const locationCol = col('location', 'field', 'venue', 'site');
   const ageCol      = col('age');
@@ -87,22 +89,32 @@ function parseCalendarCSV(text) {
   if (dateCol < 0)                throw new Error('Could not find a "Date" column.');
   if (homeCol < 0 || awayCol < 0) throw new Error('Could not find "Home Team" / "Away Team" columns.');
 
+  const isOurClub = s => s.toLowerCase().includes('mechanicville');
+
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
     const cells = parseCSVRow(lines[i]);
     const get = idx => (idx >= 0 && idx < cells.length) ? cells[idx] : '';
 
+    const homeClub = get(homeClubCol);
+    const awayClub = get(awayClubCol);
     const homeTeam = get(homeCol);
     const awayTeam = get(awayCol);
-    const homeKey  = matchOurTeam(homeTeam);
-    const awayKey  = matchOurTeam(awayTeam);
 
+    // Prefer club-column detection (reliable); fall back to team-name matching
     let ourTeam, opponent, ha;
-    if (homeKey && !awayKey)       { ourTeam = homeKey; opponent = awayTeam; ha = 'Home'; }
-    else if (awayKey && !homeKey)  { ourTeam = awayKey; opponent = homeTeam; ha = 'Away'; }
-    else if (homeKey && awayKey)   { ourTeam = homeKey; opponent = awayTeam; ha = 'Home'; }
-    else continue;
+    if (homeClubCol >= 0 && awayClubCol >= 0 && (isOurClub(homeClub) || isOurClub(awayClub))) {
+      if (isOurClub(homeClub)) { ha = 'Home'; ourTeam = matchOurTeam(homeTeam); opponent = awayTeam; }
+      else                     { ha = 'Away'; ourTeam = matchOurTeam(awayTeam);  opponent = homeTeam; }
+      if (!ourTeam) continue;
+    } else {
+      const homeKey = matchOurTeam(homeTeam);
+      const awayKey = matchOurTeam(awayTeam);
+      if      (homeKey && !awayKey) { ourTeam = homeKey; opponent = awayTeam; ha = 'Home'; }
+      else if (awayKey && !homeKey) { ourTeam = awayKey; opponent = homeTeam; ha = 'Away'; }
+      else continue;
+    }
 
     let age = ageCol >= 0 ? parseInt(get(ageCol)) : 0;
     if (!age) { const m = ourTeam.match(/U(\d+)/i); age = m ? parseInt(m[1]) : 0; }
@@ -263,7 +275,7 @@ function updateCalendarJS(rows, sourceFile) {
   const newRaw = `const RAW = ${JSON.stringify(rows)};`;
   const updated = src.replace(/^const RAW = \[.*\];$/m, newRaw);
 
-  if (updated === src) throw new Error('Could not find "const RAW = [...];" in calendar.js to replace.');
+  if (!/^const RAW = \[/m.test(src)) throw new Error('Could not find "const RAW = [...];" in calendar.js to replace.');
 
   fs.writeFileSync(CALENDAR_JS, updated, 'utf8');
   console.log(`  calendar.js  updated RAW (${rows.length} games from ${sourceFile})`);
@@ -280,12 +292,8 @@ function updateIndexHTML(rows) {
   const newSub = `Mechanicville-Stillwater — ${rows.length} matches across ${teams} teams · ${range}`;
 
   let html    = fs.readFileSync(INDEX_HTML, 'utf8');
-  const updated = html.replace(
-    /(<p id="subtitle">)[^<]*/,
-    `$1${newSub}`
-  );
-
-  if (updated === html) throw new Error('Could not find subtitle <p> in index.html to replace.');
+  if (!/<p id="subtitle">/.test(html)) throw new Error('Could not find subtitle <p> in index.html to replace.');
+  const updated = html.replace(/(<p id="subtitle">)[^<]*/, `$1${newSub}`);
 
   fs.writeFileSync(INDEX_HTML, updated, 'utf8');
   console.log(`  index.html   subtitle → "${newSub}"`);
