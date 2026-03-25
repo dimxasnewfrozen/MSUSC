@@ -252,11 +252,12 @@ function renderCal() {
       const key = `${mm}/${dd}/${cur.getFullYear()}`;
       const events = byDate[key] || [];
       weekHtml += `<div class="day-cell"><div class="day-num">${cur.getDate()}</div>`;
-      events.slice(0,3).forEach(ev => {
+      events.forEach((ev, idx) => {
         const c = COLOR[ev.ourTeam] || '#888';
-        weekHtml += `<div class="event-chip" style="background:${c}22;color:${c};border:0.5px solid ${c}55" onclick="showModal(${ev.match})">${ev.ourTeam}</div>`;
+        const extra = idx >= 3 ? 'overflow-chip" style="display:none;' : '" style="';
+        weekHtml += `<div class="event-chip ${extra}background:${c}22;color:${c};border:0.5px solid ${c}55" onclick="showModal(${ev.match})">${ev.ourTeam}</div>`;
       });
-      if (events.length > 3) weekHtml += `<div class="more-chip">+${events.length-3} more</div>`;
+      if (events.length > 3) weekHtml += `<div class="more-chip" onclick="var p=this.parentElement;p.querySelectorAll('.overflow-chip').forEach(function(el){el.style.display=''});this.remove()">+${events.length-3} more</div>`;
       weekHtml += `</div>`;
       cur.setDate(cur.getDate()+1);
       if (cur.getDay() === 0 && cur.getMonth() === mo) weekHtml += `</div><div class="week-grid"><div></div>`;
