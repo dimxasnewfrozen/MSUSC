@@ -49,6 +49,21 @@ body {
     text-align: center;
 }
 
+.stat-card-btn {
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+}
+
+.stat-card-btn:hover {
+    border-color: #c2c0b6;
+}
+
+.stat-card-btn.active {
+    border-color: #185FA5;
+    background: #185FA510;
+}
+
 .stat-num {
     font-size: 22px;
     font-weight: 500;
