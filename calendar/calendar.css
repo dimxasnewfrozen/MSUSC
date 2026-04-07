@@ -306,6 +306,71 @@ body {
     white-space: nowrap;
 }
 
+/* Practice schedule */
+
+.practice-section {
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 0.5px solid #d3d1c7;
+}
+
+.practice-header {
+    font-size: 11px;
+    font-weight: 500;
+    color: #73726c;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+}
+
+.practice-days-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px 24px;
+}
+
+.practice-day-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #5f5e5a;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+
+.practice-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 4px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.practice-row:hover {
+    background: #f1efe8;
+}
+
+.practice-team {
+    flex: 1;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.practice-note {
+    font-size: 10px;
+    font-weight: 400;
+    color: #b4b2a9;
+}
+
+.practice-time {
+    color: #73726c;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
 /* Modal */
 
 .modal-bg {
