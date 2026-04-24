@@ -248,6 +248,7 @@ function renderCal() {
   const end = new Date(maxDate.getFullYear(), maxDate.getMonth()+1, 0);
   const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const todayEST = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', month: '2-digit', day: '2-digit', year: 'numeric' }).format(new Date());
   let html = '';
   while (d <= end) {
     const yr = d.getFullYear(), mo = d.getMonth();
@@ -262,7 +263,8 @@ function renderCal() {
       const dd = String(cur.getDate()).padStart(2,'0');
       const key = `${mm}/${dd}/${cur.getFullYear()}`;
       const events = byDate[key] || [];
-      weekHtml += `<div class="day-cell"><div class="day-num">${cur.getDate()}</div>`;
+      const isToday = key === todayEST;
+      weekHtml += `<div class="day-cell${isToday ? ' today' : ''}"><div class="day-num">${cur.getDate()}</div>`;
       events.forEach((ev, idx) => {
         const c = COLOR[ev.ourTeam] || '#888';
         const extra = idx >= 3 ? 'overflow-chip" style="display:none;' : '" style="';
@@ -288,11 +290,13 @@ function renderList() {
   const byDate = {};
   const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const todayEST = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', month: '2-digit', day: '2-digit', year: 'numeric' }).format(new Date());
   sorted.forEach(e => { (byDate[e.date] = byDate[e.date]||[]).push(e); });
   let html = '';
   Object.keys(byDate).sort((a,b)=>parseDate(a)-parseDate(b)).forEach(date => {
     const dt = parseDate(date);
-    html += `<div class="list-date">${DAYS[dt.getDay()]}, ${MONTHS[dt.getMonth()]} ${dt.getDate()}</div>`;
+    const isToday = date === todayEST;
+    html += `<div class="list-date"${isToday ? ' style="color:#185FA5;font-weight:700"' : ''}>${DAYS[dt.getDay()]}, ${MONTHS[dt.getMonth()]} ${dt.getDate()}${isToday ? ' · Today' : ''}</div>`;
     byDate[date].forEach(ev => {
       const c = COLOR[ev.ourTeam] || '#888';
       const haColor = ev.ha==='Home' ? '#1D9E75' : '#BA7517';

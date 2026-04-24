@@ -205,6 +205,16 @@ body {
     opacity: 0.5;
 }
 
+.day-cell.today {
+    border-color: #185FA5;
+    background: #EEF5FF;
+}
+
+.day-cell.today .day-num {
+    color: #185FA5;
+    font-weight: 700;
+}
+
 .day-num {
     font-size: 11px;
     color: #b4b2a9;
